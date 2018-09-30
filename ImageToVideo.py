@@ -5,7 +5,7 @@ from subprocess import Popen, PIPE
 from PIL import Image as PImage
 from PIL import ImageChops as PImageChops
 
-# from pyvips import Image as VImage
+
 
 import threading
 import os
@@ -17,8 +17,6 @@ import shutil
 import time
 import gc
 
-
-# from gi.repository import Vips
 
 
 class ImageAnimation(object):
@@ -39,11 +37,13 @@ class ImageAnimation(object):
             self.original_image = PImage.open(self.file_path)
             self.original_image_width, self.original_image_height = self.original_image.size
 
-        # if self.image_lib == 'vips':
-        #     print('using vips')
-        #     self.original_image = VImage.new_from_file(self.file_path)
-        #     self.original_image_width = self.original_image.width
-        #     self.original_image_height = self.original_image.height
+        if self.image_lib == 'vips':
+            from pyvips import Image as VImage
+            from gi.repository import Vips
+            print('using vips')
+            self.original_image = VImage.new_from_file(self.file_path)
+            self.original_image_width = self.original_image.width
+            self.original_image_height = self.original_image.height
 
         self.output_file_name = 'output'
 
@@ -144,31 +144,24 @@ class ImageAnimation(object):
             resize_width = int(self.original_image_width * zoom)
             resize_height = int(self.original_image_height * zoom)
 
-            # if self.image_lib == 'vips':
-            #
-            #     # image_resize = VImage.thumbnail(self.file_path, resize_height)
-            #     # image_resize.copy(xoffset=int(x_total), yoffset=int(y_total))
-            #     # # if x_total < 0:
-            #     # #     x_total = x_total * -1
-            #     # # if y_total < 0:
-            #     # #     y_total = y_total * -1
-            #     # #
-            #     # # print(x_total)
-            #     # # print(y_total)
-            #     #
-            #     # # output = image_resize.crop(int(x_total), int(y_total), (self.output_raster_width + int(x_total)), (self.output_raster_height + int(y_total)))
-            #     # output = image_resize.crop(0, 0, (self.output_raster_width), (self.output_raster_height))
-            #     # data = output.write_to_buffer('.JPEG', Q=95)
-            #     # image_bytes = PImage.open(io.BytesIO(data))
-            #     # image_bytes.save(p.stdin, 'JPEG')
-            #
-            #
-            #     image_resize = VImage.thumbnail(self.file_path, (zoom * self.original_image_width))
-            #     image_resize.copy(xoffset=int(x_total), yoffset=int(y_total))
-            #     output = image_resize.crop(0, 0, self.output_raster_width, self.output_raster_height)
-            #     data = output.write_to_buffer('.JPEG', Q=95)
-            #     image_bytes = PImage.open(io.BytesIO(data))
-            #     image_bytes.save(p.stdin, 'JPEG')
+            if self.image_lib == 'vips':
+
+                image_resize = VImage.thumbnail(self.file_path, resize_height)
+                image_resize.copy(xoffset=int(x_total), yoffset=int(y_total))
+
+                # output = image_resize.crop(int(x_total), int(y_total), (self.output_raster_width + int(x_total)), (self.output_raster_height + int(y_total)))
+                output = image_resize.crop(0, 0, (self.output_raster_width), (self.output_raster_height))
+                data = output.write_to_buffer('.JPEG', Q=95)
+                image_bytes = PImage.open(io.BytesIO(data))
+                image_bytes.save(p.stdin, 'JPEG')
+
+
+                image_resize = VImage.thumbnail(self.file_path, (zoom * self.original_image_width))
+                image_resize.copy(xoffset=int(x_total), yoffset=int(y_total))
+                output = image_resize.crop(0, 0, self.output_raster_width, self.output_raster_height)
+                data = output.write_to_buffer('.JPEG', Q=95)
+                image_bytes = PImage.open(io.BytesIO(data))
+                image_bytes.save(p.stdin, 'JPEG')
 
             if self.image_lib == 'pillow':
                 image_resize = self.original_image.resize(
@@ -231,7 +224,7 @@ if __name__ == '__main__':
         # original_image = "IMG_0015.jpg"
         original_image = "test_image_sm.jpg"
 
-    image_video = ImageAnimation(original_image, 1920, 1080, 2, 24)
+    image_video = ImageAnimation(original_image, 1920, 1080, 2, 24, image_lib='cv')
 
     render_thread = threading.Thread(target=image_video.Render)
     render_thread.start()
