@@ -174,7 +174,7 @@ class ImageAnimation(object):
                 image_resize = self.original_image.resize(
                     (resize_width, resize_height), resample=PImage.BICUBIC)
                 image_offset = PImageChops.offset(
-                    image_resize, xoffset=int(x_total), yoffset=int(y_total))
+                    image_resize, xoffset=int(0), yoffset=int(y_total))
                 image = image_offset.crop(
                     (0, 0, self.output_raster_width, self.output_raster_height))
 
@@ -182,22 +182,22 @@ class ImageAnimation(object):
                 # image.save(p_prores.stdin, 'JPEG')
 
             if self.image_lib == 'cv':
-                x_total = 0
 
-                # adds zoom
-                image_resize = cv2.resize(self.original_image, (0, 0), fx=zoom, fy=zoom)
+                _top = (self.output_raster_height - self.original_image_height)
 
-                #
-                M = np.float32([[1, 0, x_total], [0, 1, y_total]])
+                _left =  (self.output_raster_width - self.original_image_width)
 
-                image_offset = cv2.warpAffine(image_resize, M,
-                                              (self.original_image_width, self.original_image_height))
+                top = int(_top/2)
+                bottom = _top - top
+                left = int(_left/2)
+                right = _left - left
 
-                image = image_offset[0:self.output_raster_height, 0:self.output_raster_width].copy()
+                color = [255,255,255]
 
-                corrected_img = cv2.cvtColor(image_offset, cv2.COLOR_BGR2RGB)
+                constant = cv2.copyMakeBorder(self.original_image, top, bottom, left, right, cv2.BORDER_CONSTANT, value = color)
 
-                from_pil = PImage.fromarray(corrected_img)
+
+                from_pil = PImage.fromarray(constant)
 
                 from_pil.save(p.stdin, 'JPEG')
 
@@ -229,7 +229,7 @@ if __name__ == '__main__':
         original_image = sys.argv[1]
     else:
         # original_image = "IMG_0015.jpg"
-        original_image = "test_image.jpg"
+        original_image = "test_image_sm.jpg"
 
     image_video = ImageAnimation(original_image, 1920, 1080, 2, 24)
 
