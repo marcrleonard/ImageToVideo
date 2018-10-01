@@ -13,16 +13,17 @@ Example
 
 =============================
 
+
 .. code-block:: python
 
-video_to_convert = ImageAnimation(original_image, # image path
-                                  1920,           # video width
-                                  1080,           # video height
-                                  2,              # movie length
-                                  24,             # framerate
-                                  image_lib='cv'  # image library
-                                  )
-video_to_convert.Render()
+    video_to_convert = ImageAnimation(original_image, # image path
+                                      1920,           # video width
+                                      1080,           # video height
+                                      2,              # movie length
+                                      24,             # framerate
+                                      image_lib='cv'  # image library
+                                      )
+    video_to_convert.Render()
 
 
 
