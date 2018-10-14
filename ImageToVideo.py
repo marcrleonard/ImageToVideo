@@ -19,7 +19,7 @@ import gc
 
 
 
-class ImageAnimation(object):
+class ImageToVideo(object):
     def __init__(self, original_image, output_raster_width, output_raster_height, total_seconds, fps, image_lib='cv'):
         self.file_path = original_image
         self.image_lib = None
@@ -212,33 +212,38 @@ class ImageAnimation(object):
 
         self.time_end = datetime.datetime.utcnow()
         seconds_delta = (self.time_end-self.render_start_time).total_seconds()
-        print('{} minutes'.format(seconds_delta / 60))
+        print('Render Complete. {} minutes'.format(seconds_delta / 60))
         self.render_status = 'done'
 
 
 if __name__ == '__main__':
 
-    if len(sys.argv) > 1:
-        original_image = sys.argv[1]
-    else:
-        # original_image = "IMG_0015.jpg"
-        original_image = "test_image_sm.jpg"
+    # if len(sys.argv) > 1:
+    #     original_image = sys.argv[1]
+    # else:
+    #     # original_image = "IMG_0015.jpg"
+    #     original_image = "test_image_sm.jpg"
 
-    image_video = ImageAnimation(original_image, 1920, 1080, 2, 24, image_lib='cv')
+    image_video = ImageToVideo(
+        "test_image_sm.jpg", # input image
+        1920,                # output width
+        1080,                # output height
+        2,                   # output clip duration (seconds)
+        24,                  # fps
+        image_lib='cv'       # image library
+    )
 
     render_thread = threading.Thread(target=image_video.Render)
     render_thread.start()
 
-    percentage_complete = image_video.percent_complete()
-    render_status = image_video.render_status
+    render_status = ''
     prev_percentage = 0
+
     while render_status != 'done':
-        prev_percentage = percentage_complete
         percentage_complete = int(image_video.percent_complete() * 100)
         render_status = image_video.render_status
         if percentage_complete != prev_percentage:
             print('{}% {}fps {} Remaining'.format(percentage_complete,
                                                   image_video.render_fps, image_video.render_estimated_seconds_remaining))
-        time.sleep(.2)
+        time.sleep(1)
 
-    sys.exit(1)
