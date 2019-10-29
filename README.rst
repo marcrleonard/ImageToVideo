@@ -1,7 +1,7 @@
 ImageToVideo
 -------------------------
 
-I created this to make a batteries included way to make an iamge into a video.
+This module enables a simple way to make an image into a video.
 
 Under the hood
 =============================
